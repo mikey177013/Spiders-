@@ -3,632 +3,204 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enhanced Interactive Spider Animation</title>
+    <title>Interactive Spider</title>
     <style>
         html, body {
             margin: 0;
             padding: 0;
-            overflow: hidden;
-            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 100%);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            user-select: none;
+            overflow-y: hidden;
+            overflow-x: scroll;
+            background-color: black;
+        }
+
+        canvas {
+            height: 100%;
+        }
+
+        * {
             -webkit-tap-highlight-color: transparent;
-        }
-
-        #canvas {
-            display: block;
-            position: absolute;
-            top: 0;
-            left: 0;
-        }
-
-        .controls {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            color: white;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 15px;
-            border-radius: 10px;
-            z-index: 100;
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            max-width: 300px;
-        }
-
-        .controls h3 {
-            margin-top: 0;
-            color: #ff6b6b;
-            font-size: 18px;
-        }
-
-        .slider-container {
-            margin: 10px 0;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-size: 14px;
-            color: #ccc;
-        }
-
-        input[type="range"] {
-            width: 100%;
-            height: 5px;
-            background: #333;
-            border-radius: 5px;
-            outline: none;
-            -webkit-appearance: none;
-        }
-
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 15px;
-            height: 15px;
-            background: #ff6b6b;
-            border-radius: 50%;
-            cursor: pointer;
-        }
-
-        .buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-            flex-wrap: wrap;
-        }
-
-        button {
-            background: #333;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: background 0.3s;
-            flex: 1;
-            min-width: 120px;
-        }
-
-        button:hover {
-            background: #444;
-        }
-
-        button.active {
-            background: #ff6b6b;
-            color: white;
-        }
-
-        #spiderCount {
-            color: #ff6b6b;
-            font-weight: bold;
-        }
-
-        #instructions {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: rgba(255, 255, 255, 0.7);
-            text-align: center;
-            background: rgba(0, 0, 0, 0.5);
-            padding: 10px 15px;
-            border-radius: 8px;
-            font-size: 14px;
-            z-index: 100;
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .spider-type {
-            display: flex;
-            align-items: center;
-            margin: 8px 0;
-            font-size: 14px;
-        }
-
-        .spider-color {
-            width: 15px;
-            height: 15px;
-            border-radius: 50%;
-            margin-right: 8px;
-        }
-
-        @media (max-width: 768px) {
-            .controls {
-                top: 10px;
-                left: 10px;
-                right: 10px;
-                max-width: none;
-            }
-            
-            #instructions {
-                bottom: 10px;
-                left: 10px;
-                right: 10px;
-                transform: none;
-                font-size: 12px;
-            }
-            
-            .buttons {
-                flex-direction: column;
-            }
-            
-            button {
-                min-width: auto;
-            }
         }
     </style>
 </head>
 <body>
+    <!-- I revised the original to make interactive in phone, the original code is from
+      https://codingtorque.com/spider-following-to-cursor-animation-using-html-css-and-javascript/
+     -->
     <canvas id="canvas"></canvas>
-    
-    <div class="controls">
-        <h3>Spider Controls</h3>
-        
-        <div class="slider-container">
-            <label for="spiderCountSlider">Spider Count: <span id="spiderCount">2</span></label>
-            <input type="range" id="spiderCountSlider" min="1" max="10" value="2" step="1">
-        </div>
-        
-        <div class="slider-container">
-            <label for="spiderSpeed">Spider Speed: <span id="speedValue">Normal</span></label>
-            <input type="range" id="spiderSpeed" min="1" max="10" value="5" step="1">
-        </div>
-        
-        <div class="slider-container">
-            <label for="webDensity">Web Density: <span id="densityValue">Normal</span></label>
-            <input type="range" id="webDensity" min="1" max="10" value="5" step="1">
-        </div>
-        
-        <div class="buttons">
-            <button id="addSpider">Add Spider</button>
-            <button id="removeSpider">Remove Spider</button>
-            <button id="clearSpiders">Clear All</button>
-        </div>
-        
-        <div class="buttons">
-            <button id="modeToggle" class="active">Dark Mode</button>
-            <button id="colorMode">Random Colors</button>
-        </div>
-        
-        <div id="spiderTypes">
-            <div class="spider-type"><div class="spider-color" style="background:#ff6b6b"></div> Normal Spider</div>
-            <div class="spider-type"><div class="spider-color" style="background:#4ecdc4"></div> Fast Spider</div>
-            <div class="spider-type"><div class="spider-color" style="background:#ffe66d"></div> Big Spider</div>
-        </div>
-    </div>
-    
-    <div id="instructions">
-        Move your cursor/finger to control the spiders. Touch/click to create a new spider at that location.
-    </div>
 
     <script>
-        // Canvas setup
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        const { sin, cos, PI, hypot, min, max, atan2 } = Math;
-        
-        // Enhanced spider types with different properties
-        const SPIDER_TYPES = {
-            NORMAL: { color: '#ff6b6b', speed: 1, size: 1, legCount: 8 },
-            FAST: { color: '#4ecdc4', speed: 1.5, size: 0.8, legCount: 6 },
-            BIG: { color: '#ffe66d', speed: 0.7, size: 1.5, legCount: 10 }
-        };
-        
-        // Global variables
-        let spiders = [];
-        let targetX = 0, targetY = 0;
-        let darkMode = true;
-        let colorMode = 'default';
-        let webDensity = 5;
-        let spiderSpeed = 5;
-        
-        // Initialize canvas size
-        function initCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+        let w, h;
+        const ctx = canvas.getContext("2d");
+        const { sin, cos, PI, hypot, min, max } = Math;
+
+
+
+        function spawn() {
+
+            const pts = many(333, () => {
+                return {
+                    x: rnd(innerWidth),
+                    y: rnd(innerHeight),
+                    len: 0,
+                    r: 0
+                };
+            });
+
+            const pts2 = many(9, (i) => {
+                return {
+                    x: cos((i / 9) * PI * 2),
+                    y: sin((i / 9) * PI * 2)
+                };
+            });
+
+            let seed = rnd(100)
+            let tx = rnd(innerWidth); 
+            let ty = rnd(innerHeight);
+            let x = rnd(innerWidth)
+            let y = rnd(innerHeight)
+            let kx = rnd(0.5, 0.5)
+            let ky = rnd(0.5, 0.5)
+            let walkRadius = pt(rnd(50,50), rnd(50,50))
+        let r = innerWidth / rnd(100, 150);
+
+            function paintPt(pt){
+                pts2.forEach((pt2) => {
+                    if (!pt.len )
+                        return
+                    drawLine(
+                        lerp(x + pt2.x * r, pt.x, pt.len * pt.len),
+                        lerp(y + pt2.y * r, pt.y, pt.len * pt.len),
+                        x + pt2.x * r,
+                        y + pt2.y * r
+                    );
+                });
+                drawCircle(pt.x, pt.y, pt.r);
+            }
+
+            return {
+                follow(x,y) {
+                    tx = x;
+                    ty = y;
+                },
+
+                tick(t) {
+
+            const selfMoveX = cos(t*kx+seed)*walkRadius.x        
+            const selfMoveY = sin(t*ky+seed)*walkRadius.y      
+            let fx = tx + selfMoveX;         
+            let fy = ty + selfMoveY; 
+
+            x += min(innerWidth/100, (fx - x)/10)
+            y += min(innerWidth/100, (fy - y)/10)
+
+            let i = 0
+            pts.forEach((pt) => {
+                const dx = pt.x - x,
+                    dy = pt.y - y;
+                const len = hypot(dx, dy);
+                let r = min(2, innerWidth / len / 5);
+                pt.t = 0;
+                const increasing = len < innerWidth / 10 
+                    && (i++) < 8;
+                let dir = increasing ? 0.1 : -0.1;
+                if (increasing) {
+                    r *= 1.5;
+                }
+                pt.r = r;
+                pt.len = max(0, min(pt.len + dir, 1));
+                paintPt(pt)
+            });
+
+
+
+                } 
+            }
         }
-        
-        // Generate random number
+
+        const spiders = many(2, spawn)
+
+        // Events
+        addEventListener("pointermove", (e) => {
+            spiders.forEach(spider => {
+                spider.follow(e.clientX, e.clientY)
+            })
+        });
+        addEventListener("touchstart", (e) => {
+            let touch = e.touches[0];
+            spiders.forEach(spider => {
+                spider.follow(touch.clientX, touch.clientY);
+            });
+        });
+
+        addEventListener("touchmove", (e) => {
+            let touch = e.touches[0];
+            spiders.forEach(spider => {
+                spider.follow(touch.clientX, touch.clientY);
+            });
+        });
+
+        requestAnimationFrame(function anim(t) {
+            if (w !== innerWidth) w = canvas.width = innerWidth;
+            if (h !== innerHeight) h = canvas.height = innerHeight;
+            ctx.fillStyle = "#000";
+            drawCircle(0, 0, w * 10);
+            ctx.fillStyle = ctx.strokeStyle = "#fff";
+            t/=1000
+            spiders.forEach(spider => spider.tick(t))
+            requestAnimationFrame(anim);
+        });
+
+        function recalc(X, Y) {
+            tx = X;
+            ty = Y;
+        }
+
         function rnd(x = 1, dx = 0) {
             return Math.random() * x + dx;
         }
-        
-        // Linear interpolation
+
+        function drawCircle(x, y, r, color) {
+            //console.log(x,y,r)
+            // ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.ellipse(x, y, r, r, 0, 0, PI * 2);
+            ctx.fill();
+        }
+
+        function drawLine(x0, y0, x1, y1) {
+            ctx.beginPath();
+            ctx.moveTo(x0, y0);
+
+            many(100, (i) => {
+                i = (i + 1) / 100;
+                let x = lerp(x0, x1, i);
+                let y = lerp(y0, y1, i);
+                let k = noise(x/5+x0, y/5+y0) * 2;
+                ctx.lineTo(x + k, y + k);
+            });
+
+            ctx.stroke();
+        }
+
+        function many(n, f) {
+            return [...Array(n)].map((_, i) => f(i));
+        }
+
         function lerp(a, b, t) {
             return a + (b - a) * t;
         }
-        
-        // Noise function for organic movement
+
         function noise(x, y, t = 101) {
             let w0 = sin(0.3 * x + 1.4 * t + 2.0 + 
                         2.5 * sin(0.4 * y + -1.3 * t + 1.0));
             let w1 = sin(0.2 * y + 1.5 * t + 2.8 + 
                         2.3 * sin(0.5 * x + -1.2 * t + 0.5));
-            return (w0 + w1) * 0.5;
+            return w0 + w1;
         }
-        
-        // Create multiple items
-        function many(n, f) {
-            return [...Array(n)].map((_, i) => f(i));
+
+        function pt(x,y){
+            return {x,y}
         }
-        
-        // Draw a circle
-        function drawCircle(x, y, r, color) {
-            ctx.fillStyle = color;
-            ctx.beginPath();
-            ctx.ellipse(x, y, r, r, 0, 0, PI * 2);
-            ctx.fill();
-        }
-        
-        // Draw a line with organic waviness
-        function drawLine(x0, y0, x1, y1, width = 1, color = '#fff') {
-            ctx.strokeStyle = color;
-            ctx.lineWidth = width;
-            ctx.beginPath();
-            ctx.moveTo(x0, y0);
-            
-            const segments = 20;
-            for (let i = 1; i <= segments; i++) {
-                const t = i / segments;
-                let x = lerp(x0, x1, t);
-                let y = lerp(y0, y1, t);
-                
-                // Add organic waviness
-                let k = noise(x/5 + x0, y/5 + y0, Date.now()/2000) * 3;
-                ctx.lineTo(x + k, y + k);
-            }
-            
-            ctx.stroke();
-        }
-        
-        // Create a spider with enhanced properties
-        function createSpider(x, y, type = 'NORMAL') {
-            const config = SPIDER_TYPES[type];
-            const legCount = config.legCount;
-            const color = colorMode === 'random' ? `hsl(${rnd(360)}, 70%, 60%)` : config.color;
-            
-            // Create leg points
-            const legPoints = many(legCount, (i) => {
-                const angle = (i / legCount) * PI * 2;
-                return {
-                    x: cos(angle),
-                    y: sin(angle),
-                    length: 0,
-                    active: false
-                };
-            });
-            
-            // Create web connection points
-            const webPoints = many(Math.floor(webDensity * 20), () => {
-                return {
-                    x: rnd(innerWidth),
-                    y: rnd(innerHeight),
-                    length: 0,
-                    radius: 0,
-                    active: false
-                };
-            });
-            
-            // Spider properties
-            const spider = {
-                x: x || rnd(innerWidth),
-                y: y || rnd(innerHeight),
-                targetX: x || rnd(innerWidth),
-                targetY: y || rnd(innerHeight),
-                color: color,
-                size: config.size,
-                speed: config.speed * (spiderSpeed / 5),
-                legPoints: legPoints,
-                webPoints: webPoints,
-                walkRadius: { x: rnd(30, 30), y: rnd(30, 30) },
-                movementSeed: rnd(100),
-                movementX: rnd(0.5, 0.5),
-                movementY: rnd(0.5, 0.5),
-                bodyRadius: innerWidth / rnd(100, 150) * config.size,
-                type: type,
-                followMouse: true,
-                webColor: colorMode === 'random' ? `hsla(${rnd(360)}, 70%, 60%, 0.5)` : 'rgba(255, 255, 255, 0.3)'
-            };
-            
-            return spider;
-        }
-        
-        // Update spider position and legs
-        function updateSpider(spider, t, mouseX, mouseY) {
-            // Update target based on mouse position if following mouse
-            if (spider.followMouse) {
-                const selfMoveX = cos(t * spider.movementX + spider.movementSeed) * spider.walkRadius.x;
-                const selfMoveY = sin(t * spider.movementY + spider.movementSeed) * spider.walkRadius.y;
-                spider.targetX = mouseX + selfMoveX;
-                spider.targetY = mouseY + selfMoveY;
-            }
-            
-            // Move spider towards target
-            const dx = spider.targetX - spider.x;
-            const dy = spider.targetY - spider.y;
-            const distance = hypot(dx, dy);
-            const maxStep = min(innerWidth / 100 * spider.speed, distance / 10);
-            
-            if (distance > 0) {
-                spider.x += (dx / distance) * maxStep;
-                spider.y += (dy / distance) * maxStep;
-            }
-            
-            // Update leg animation based on movement
-            const movementSpeed = hypot(dx, dy) / 10;
-            spider.legPoints.forEach((leg, i) => {
-                const baseAngle = (i / spider.legPoints.length) * PI * 2;
-                const targetLength = 0.3 + sin(t * 5 + i) * 0.2 * movementSpeed;
-                leg.length = lerp(leg.length, targetLength, 0.1);
-                leg.active = leg.length > 0.35;
-            });
-            
-            // Update web points
-            let activeWebCount = 0;
-            spider.webPoints.forEach((point) => {
-                const dx = point.x - spider.x;
-                const dy = point.y - spider.y;
-                const distance = hypot(dx, dy);
-                
-                // Determine if web point should be active
-                const shouldBeActive = distance < innerWidth / 10 && activeWebCount < 8;
-                activeWebCount += shouldBeActive ? 1 : 0;
-                
-                // Animate web point
-                const targetLength = shouldBeActive ? 1 : 0;
-                point.length = lerp(point.length, targetLength, 0.05);
-                point.radius = min(2, innerWidth / distance / 5) * (shouldBeActive ? 1.5 : 1);
-                point.active = shouldBeActive;
-            });
-        }
-        
-        // Draw spider with legs
-        function drawSpider(spider) {
-            // Draw web connections
-            spider.webPoints.forEach((point) => {
-                if (point.length > 0) {
-                    spider.legPoints.forEach((leg) => {
-                        const legX = spider.x + leg.x * spider.bodyRadius;
-                        const legY = spider.y + leg.y * spider.bodyRadius;
-                        
-                        const webX = lerp(legX, point.x, point.length * point.length);
-                        const webY = lerp(legY, point.y, point.length * point.length);
-                        
-                        drawLine(webX, webY, legX, legY, 0.5, spider.webColor);
-                    });
-                    
-                    // Draw web point
-                    if (point.active) {
-                        drawCircle(point.x, point.y, point.radius, spider.color);
-                    }
-                }
-            });
-            
-            // Draw spider body
-            drawCircle(spider.x, spider.y, spider.bodyRadius, spider.color);
-            
-            // Draw spider legs
-            spider.legPoints.forEach((leg) => {
-                const legLength = spider.bodyRadius * 2 * (1 + leg.length);
-                const legX = spider.x + leg.x * legLength;
-                const legY = spider.y + leg.y * legLength;
-                
-                // Draw leg with joint
-                const jointX = spider.x + leg.x * spider.bodyRadius * 1.5;
-                const jointY = spider.y + leg.y * spider.bodyRadius * 1.5;
-                
-                ctx.lineWidth = 2;
-                ctx.strokeStyle = leg.active ? '#fff' : spider.color;
-                ctx.beginPath();
-                ctx.moveTo(spider.x + leg.x * spider.bodyRadius, spider.y + leg.y * spider.bodyRadius);
-                ctx.quadraticCurveTo(jointX, jointY, legX, legY);
-                ctx.stroke();
-            });
-            
-            // Draw spider eyes
-            const eyeOffset = spider.bodyRadius * 0.3;
-            drawCircle(spider.x - eyeOffset, spider.y - eyeOffset, spider.bodyRadius * 0.2, '#fff');
-            drawCircle(spider.x + eyeOffset, spider.y - eyeOffset, spider.bodyRadius * 0.2, '#fff');
-            drawCircle(spider.x - eyeOffset, spider.y - eyeOffset, spider.bodyRadius * 0.1, '#000');
-            drawCircle(spider.x + eyeOffset, spider.y - eyeOffset, spider.bodyRadius * 0.1, '#000');
-        }
-        
-        // Initialize spiders
-        function initSpiders(count) {
-            spiders = [];
-            const types = Object.keys(SPIDER_TYPES);
-            
-            for (let i = 0; i < count; i++) {
-                const type = types[i % types.length];
-                spiders.push(createSpider(rnd(innerWidth), rnd(innerHeight), type));
-            }
-        }
-        
-        // Update UI elements
-        function updateUI() {
-            document.getElementById('spiderCount').textContent = spiders.length;
-            
-            // Update speed display
-            const speedText = spiderSpeed < 3 ? 'Slow' : spiderSpeed < 7 ? 'Normal' : 'Fast';
-            document.getElementById('speedValue').textContent = speedText;
-            
-            // Update density display
-            const densityText = webDensity < 3 ? 'Low' : webDensity < 7 ? 'Normal' : 'High';
-            document.getElementById('densityValue').textContent = densityText;
-            
-            // Update mode button
-            document.getElementById('modeToggle').textContent = darkMode ? 'Dark Mode' : 'Light Mode';
-            document.getElementById('modeToggle').className = darkMode ? 'active' : '';
-            
-            // Update color button
-            document.getElementById('colorMode').textContent = 
-                colorMode === 'default' ? 'Random Colors' : 'Default Colors';
-            document.getElementById('colorMode').className = colorMode === 'random' ? 'active' : '';
-        }
-        
-        // Animation loop
-        function animate(t) {
-            // Clear canvas with background
-            if (darkMode) {
-                ctx.fillStyle = '#0c0c0c';
-            } else {
-                ctx.fillStyle = '#f0f0f0';
-            }
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            // Add subtle background pattern
-            if (!darkMode) {
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.02)';
-                for (let i = 0; i < 50; i++) {
-                    const x = rnd(canvas.width);
-                    const y = rnd(canvas.height);
-                    const r = rnd(3);
-                    drawCircle(x, y, r, 'rgba(0, 0, 0, 0.02)');
-                }
-            }
-            
-            // Update and draw all spiders
-            spiders.forEach(spider => {
-                updateSpider(spider, t/1000, targetX, targetY);
-                drawSpider(spider);
-            });
-            
-            requestAnimationFrame(animate);
-        }
-        
-        // Event listeners
-        function setupEventListeners() {
-            // Mouse/touch movement
-            document.addEventListener('pointermove', (e) => {
-                targetX = e.clientX;
-                targetY = e.clientY;
-            });
-            
-            document.addEventListener('touchmove', (e) => {
-                e.preventDefault();
-                const touch = e.touches[0];
-                targetX = touch.clientX;
-                targetY = touch.clientY;
-            });
-            
-            // Add spider on click/tap
-            document.addEventListener('click', (e) => {
-                const types = Object.keys(SPIDER_TYPES);
-                const randomType = types[Math.floor(rnd(types.length))];
-                spiders.push(createSpider(e.clientX, e.clientY, randomType));
-                updateUI();
-            });
-            
-            // Spider count slider
-            document.getElementById('spiderCountSlider').addEventListener('input', (e) => {
-                const newCount = parseInt(e.target.value);
-                if (newCount > spiders.length) {
-                    const types = Object.keys(SPIDER_TYPES);
-                    for (let i = spiders.length; i < newCount; i++) {
-                        const type = types[i % types.length];
-                        spiders.push(createSpider(rnd(innerWidth), rnd(innerHeight), type));
-                    }
-                } else if (newCount < spiders.length) {
-                    spiders.splice(newCount);
-                }
-                updateUI();
-            });
-            
-            // Spider speed slider
-            document.getElementById('spiderSpeed').addEventListener('input', (e) => {
-                spiderSpeed = parseInt(e.target.value);
-                spiders.forEach(spider => {
-                    spider.speed = SPIDER_TYPES[spider.type].speed * (spiderSpeed / 5);
-                });
-                updateUI();
-            });
-            
-            // Web density slider
-            document.getElementById('webDensity').addEventListener('input', (e) => {
-                webDensity = parseInt(e.target.value);
-                spiders.forEach(spider => {
-                    spider.webPoints = many(Math.floor(webDensity * 20), () => {
-                        return {
-                            x: rnd(innerWidth),
-                            y: rnd(innerHeight),
-                            length: 0,
-                            radius: 0,
-                            active: false
-                        };
-                    });
-                });
-                updateUI();
-            });
-            
-            // Add spider button
-            document.getElementById('addSpider').addEventListener('click', () => {
-                const types = Object.keys(SPIDER_TYPES);
-                const randomType = types[Math.floor(rnd(types.length))];
-                spiders.push(createSpider(rnd(innerWidth), rnd(innerHeight), randomType));
-                document.getElementById('spiderCountSlider').value = spiders.length;
-                updateUI();
-            });
-            
-            // Remove spider button
-            document.getElementById('removeSpider').addEventListener('click', () => {
-                if (spiders.length > 1) {
-                    spiders.pop();
-                    document.getElementById('spiderCountSlider').value = spiders.length;
-                    updateUI();
-                }
-            });
-            
-            // Clear all spiders button
-            document.getElementById('clearSpiders').addEventListener('click', () => {
-                spiders = [];
-                document.getElementById('spiderCountSlider').value = 0;
-                updateUI();
-            });
-            
-            // Toggle dark/light mode
-            document.getElementById('modeToggle').addEventListener('click', () => {
-                darkMode = !darkMode;
-                updateUI();
-            });
-            
-            // Toggle color mode
-            document.getElementById('colorMode').addEventListener('click', () => {
-                colorMode = colorMode === 'default' ? 'random' : 'default';
-                
-                // Update all spiders with new color mode
-                spiders.forEach(spider => {
-                    if (colorMode === 'random') {
-                        spider.color = `hsl(${rnd(360)}, 70%, 60%)`;
-                        spider.webColor = `hsla(${rnd(360)}, 70%, 60%, 0.5)`;
-                    } else {
-                        spider.color = SPIDER_TYPES[spider.type].color;
-                        spider.webColor = 'rgba(255, 255, 255, 0.3)';
-                    }
-                });
-                
-                updateUI();
-            });
-            
-            // Handle window resize
-            window.addEventListener('resize', () => {
-                initCanvas();
-            });
-        }
-        
-        // Initialize the application
-        function init() {
-            initCanvas();
-            initSpiders(2);
-            setupEventListeners();
-            updateUI();
-            animate(0);
-        }
-        
-        // Start the app
-        init();
     </script>
 </body>
 </html>
